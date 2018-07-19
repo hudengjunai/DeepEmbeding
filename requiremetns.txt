@@ -1,0 +1,3 @@
+visdom
+fire
+numpy

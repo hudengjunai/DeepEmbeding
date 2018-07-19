@@ -1,0 +1,12 @@
+*.out
+*.log
+checkpoints/*.pth
+checkpoints/*.csv
+checkpoints/*00.jpg
+data/Stanford_Online_Products/
+data/DeepInshop/
+*.npy
+*.csv
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
