@@ -38,7 +38,7 @@ parser.add_argument('--nu',type=float,default=0.0,
 parser.add_argument('--steps',type=str,default='30,50,100,300',
                     help='epochs to updata learning rate')
 parser.add_argument('--wd',type=float,default=0.0001,
-                    help='weight decay rate,default is 0.00001')
+                    help='weight decay rate,default is 0.0001')
 parser.add_argument('--seed',type=int,default=123,
                     help='random seed to use,default=123')
 parser.add_argument('--factor',type=float,default=0.5,
@@ -87,7 +87,8 @@ def train():
     total_param.append({'params':model.dense.parameters(),'lr':opt.lr})
     total_param.extend(conv_params)
     total_param.extend(non_conv_param)
-    optimizer = torch.optim.Adam(total_param,lr=opt.lr,weight_decay=opt.wd)
+    #optimizer = torch.optim.Adam(total_param,lr=opt.lr,weight_decay=opt.wd)
+    optimizer = torch.optim.SGD(total_param,lr=opt.lr,momentum=0.89)
     optimizer_beta = torch.optim.SGD([{'params':beta}],lr=opt.lr_beta,momentum= 0.9)
 
 

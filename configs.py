@@ -14,7 +14,7 @@ class DefaultConfig(object):
     max_epoch = 800
     print_freq = 40
     batch_size = 32
-    vis_host="http://192.168.3.13"
+    vis_host="http://hpc3.yud.io"
     vis_port=8088
     vis_env='Street2shop'
     debug = False

@@ -92,7 +92,7 @@ def nmi(gt_class,features):
     gt_class = gt_class - min(gt_class)
     n_cluster = len(set(gt_class))
     model = KMeans(n_clusters=n_cluster)
-    Y=model.fit(features)
+    Y=model.fit(features) # this would take 40 minutes
     cl_class = Y.labels_
     score = normalized_mutual_info_score(gt_class,cl_class)
     print("the normal_mutal_info_score",score)
