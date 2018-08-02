@@ -43,6 +43,9 @@ class Visulizer(object):
             info=info))
         self.vis.text(self.log_text, win)
 
+    def delete_env(self,env):
+        self.vis.delete_env(env)
+
 if __name__=='__main__':
     """nohup python -m visdom.server --port-8088 & 
     this to start visdom server"""

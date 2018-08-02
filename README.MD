@@ -39,6 +39,16 @@ L1 Triplet Batch_hard softmargin [In Defense of the Triplet Loss for Person Re-I
 # About This project
 1.download data store in data directory
 2.train model with different loss type and dataset
+  run train cub200 model
+  ```angular2html
+  nohup python train_mx_ebay_margin.py --gpus=1 --batch-k=2 --use_viz --epochs=30 --use_pretrained --steps=12,16,20,24 --name=standk2 > mystandard2.out 2>&1 &
+  ```
+  run train stanford_online_product
+  ```angular2html
+  nohup python train_mx_ebay_margin.py --batch-k=2 --batch-size=80 --use_pretrained --use_viz --gpus=0 --name=Inclass_ebay --data=EbayInClass > mytraininclass_ebay.log 2>&1
+```
+
+  
 3.run with mxnet-server or pytorch-flask-server
 
 

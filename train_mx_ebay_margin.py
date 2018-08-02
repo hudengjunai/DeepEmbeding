@@ -7,8 +7,7 @@ import numpy as np
 
 from bottleneck import argpartition
 import mxnet as mx
-from data import getEbayData
-from data import getCUB200
+from data import getCUB200,getEbayCrossClassData,getEbayInClassData
 import os
 from mxnet import gluon
 import mxnet.gluon.model_zoo.vision as vision
@@ -17,6 +16,8 @@ from mxnet import nd
 from models.mx_margin_model import MarginLoss,MarginNet
 from utils import Visulizer
 from configs import opt as opt_conf
+import ipdb
+from tqdm import tqdm
 logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser(description='train a model for image classification.')
@@ -98,14 +99,25 @@ if opt.use_pretrained:
 
 net.hybridize()
 net = MarginNet(net.features, opt.embed_dim, opt.batch_k)
-beta = mx.gluon.Parameter('beta', shape=(100,))
-
-if opt.data=='Ebay':
-    train_dataloader,val_dataloader = getEbayData(os.path.join('data/',opt.data),batch_k=opt.batch_k,batch_size=batch_size )
-else:
-    train_dataloader,val_dataloader = getCUB200(os.path.join('data/',opt.data),batch_k=opt.batch_k,batch_size=batch_size )
+beta = mx.gluon.Parameter('beta', shape=(100000,))
+data_dict={'CUB_200_2011':{'data_dir':'CUB_200_2011','func':getCUB200},
+           'EbayInClass':{'data_dir':'Stanford_Online_Products','func':getEbayInClassData},
+           'EbayCrossClass':{'data_dir':'Stanford_Online_Products','func':getEbayCrossClassData}}
+if opt.debug:
+    ipdb.set_trace()
+train_dataloader,val_dataloader = data_dict[opt.data]['func'](os.path.join('data/',data_dict[opt.data]['data_dir']),
+                                                              batch_k=opt.batch_k,batch_size=opt.batch_size)
+# if opt.data=='Ebay':
+#     train_dataloader,val_dataloader = getEbayData(os.path.join('data/',opt.data),batch_k=opt.batch_k,batch_size=batch_size )
+# elif opt.data=='CUB_200_2011':
+#     train_dataloader,val_dataloader = getCUB200(os.path.join('data/',opt.data),batch_k=opt.batch_k,batch_size=batch_size )
 #train_dataloader has datashape [1,batch_size,channel,W,H] for image data,[1,batch_size,1] for label
 #test_dataloader has datashape  [batch_size,channel,W,H] for image data,[batch_size,1] for label
+# use viz
+if opt.use_viz:
+    viz = Visulizer(host=opt_conf.vis_host,port=opt_conf.vis_port,env='mx_margin'+opt.name)
+    viz.log(str(opt))
+    viz.log("start to train mxnet marging model name:%s"%(opt.name))
 
 def get_distance_matrix(x):
     """Get distance matrix given a matrix. Used in testing."""
@@ -136,20 +148,23 @@ def evaluate_emb(emb, labels):
 
 def test(ctx):
     """Test a model."""
+    if opt.use_viz:
+        viz.log("begin to valid")
 
     outputs = []
     labels = []
-    for batch in val_dataloader:
+    for i,batch in enumerate(val_dataloader):
         data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
         label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
         # after split data is list of two data batch
         for x in data:
             outputs.append(net(x)[-1])
         labels +=label
-
-
+        if (i+1)%(opt.log_interval*2) ==0:
+            viz.log("valid iter {0}".format(i))
     outputs = nd.concatenate(outputs, axis=0)
     labels = nd.concatenate(labels, axis=0)
+    viz.log("begin to eval embedding search")
     return evaluate_emb(outputs, labels)
 
 def get_lr(lr, epoch, steps, factor):
@@ -183,11 +198,6 @@ def train(epochs,ctx):
 
     loss = MarginLoss(margin=opt.margin, nu=opt.nu)
 
-
-    # use viz
-    if opt.use_viz:
-        viz = Visulizer(host=opt_conf.vis_host,port=opt_conf.vis_port,env='mx_margin'+opt.name)
-        viz.log("start to train mxnet marging model name:%s"%(opt.name))
 
     best_val =0.0
     for epoch in range(epochs):
@@ -239,6 +249,10 @@ def train(epochs,ctx):
                 if opt.use_viz:
                     viz.plot('margin_loss',cumulative_loss-prev_loss)
                 prev_loss = cumulative_loss
+            if opt.debug:
+                import ipdb
+                ipdb.set_trace()
+                break
 
         viz.log('[Epoch {0}] training loss={1}'.format(epoch, cumulative_loss))
         viz.log('[Epoch {0}] time cost: {1}'.format(epoch, time.time() - tic))
