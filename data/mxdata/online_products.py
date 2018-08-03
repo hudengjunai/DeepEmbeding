@@ -35,6 +35,7 @@ class MxEbayInClass(Dataset):
         self.test_image_files =[]
         self.test_labels =[]
         self.train_length = 0
+
         if self.is_train:
             table_name = os.path.join(self.root,'Ebay_train.txt')
             table_data = pd.read_table(table_name, header=0, delim_whitespace=True)
@@ -50,7 +51,7 @@ class MxEbayInClass(Dataset):
             self.super_id_dist = [len(v) for k,v in self.super2class.items()]
             total = sum(self.super_id_dist)
             self.super_id_dist = [v*1.0/total for v in self.super_id_dist]
-            self.class2imagefiless = [[]]
+            self.class2imagefiless = [[]] # placeholder for class_id = 0
             for class_id in self.class_ids:
                 one_class_paths = table_data[table_data.class_id==class_id].path.tolist() # type list
                 self.class2imagefiless.append(one_class_paths)
@@ -62,11 +63,12 @@ class MxEbayInClass(Dataset):
             self.test_labels = table_data.class_id.tolist()
 
 
+
     def __len__(self):
         if self.is_train:
             return 800
         else:
-            return len(self.test_image_files)
+            return 4000
 
     def sample_train_batch(self):
         batch =[]

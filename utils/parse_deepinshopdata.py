@@ -4,7 +4,7 @@ from mxnet.image import imread
 import os
 bboxfile = r'../Logs/Anno/list_bbox_inshop.txt'
 line = None
-skip=40009
+skip=40006
 with open(bboxfile,'r') as f_box:
     f_box.readline() #
     f_box.readline() #

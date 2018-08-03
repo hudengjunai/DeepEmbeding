@@ -8,6 +8,7 @@ import numpy as np
 from bottleneck import argpartition
 import mxnet as mx
 from data import getCUB200,getEbayCrossClassData,getEbayInClassData
+from data import getDeepInClassFashion,getDeepCrossClassFashion
 import os
 from mxnet import gluon
 import mxnet.gluon.model_zoo.vision as vision
@@ -71,7 +72,7 @@ parser.add_argument('--name',type=str,default='cub200',
                     help='the train instance name')
 
 opt = parser.parse_args()
-
+opt.save_model_prefix = opt.name # force save model prefix to name
 logging.info(opt)
 # Settings.
 mx.random.seed(opt.seed)
@@ -102,7 +103,9 @@ net = MarginNet(net.features, opt.embed_dim, opt.batch_k)
 beta = mx.gluon.Parameter('beta', shape=(100000,))
 data_dict={'CUB_200_2011':{'data_dir':'CUB_200_2011','func':getCUB200},
            'EbayInClass':{'data_dir':'Stanford_Online_Products','func':getEbayInClassData},
-           'EbayCrossClass':{'data_dir':'Stanford_Online_Products','func':getEbayCrossClassData}}
+           'EbayCrossClass':{'data_dir':'Stanford_Online_Products','func':getEbayCrossClassData},
+           'DeepFashionInClass':{'data_dir':'DeepInShop','func':getDeepInClassFashion},
+           'DeepFashionCrossClass':{'data_dir':'DeepInShop','func':getDeepCrossClassFashion}}
 if opt.debug:
     ipdb.set_trace()
 train_dataloader,val_dataloader = data_dict[opt.data]['func'](os.path.join('data/',data_dict[opt.data]['data_dir']),
@@ -121,6 +124,8 @@ if opt.use_viz:
 
 def get_distance_matrix(x):
     """Get distance matrix given a matrix. Used in testing."""
+    if opt.use_viz:
+        viz.log("begin to compute distance matrix")
     square = nd.sum(x ** 2.0, axis=1, keepdims=True)
     distance_square = square + square.transpose() - (2.0 * nd.dot(x, x.transpose()))
     return nd.sqrt(distance_square)
@@ -128,20 +133,31 @@ def get_distance_matrix(x):
 def evaluate_emb(emb, labels):
     """Evaluate embeddings based on Recall@k."""
     d_mat = get_distance_matrix(emb)
-    d_mat = d_mat.asnumpy()
-    labels = labels.asnumpy()
+    #d_mat = d_mat.asnumpy()
+    #labels = labels.asnumpy() #directory operate on mxnet.ndarray if convert to numpy,would cause memeory error
 
     names = []
     accs = []
+    for i in range(emb.shape[0]):
+        d_mat[i,i]=1e10
+    index_mat = nd.argsort(d_mat)
+    nd.waitall()
+    if opt.use_viz:
+        viz.log("nd all dist mat")
     for k in [1, 2, 4, 8, 16]:
         names.append('Recall@%d' % k)
         correct, cnt = 0.0, 0.0
+        index_mat_part = index_mat[:,:k]
         for i in range(emb.shape[0]):
-            d_mat[i, i] = 1e10
-            nns = argpartition(d_mat[i], k)[:k]
-            if any(labels[i] == labels[nn] for nn in nns):
-                correct += 1
-            cnt += 1
+            if any(labels[i] == labels[nn] for nn in index_mat_part[i]):
+                correct +=1
+            cnt +=1
+        # for i in range(emb.shape[0]):
+        #     d_mat[i, i] = 1e10
+        #     nns = argpartition(d_mat[i], k)[:k]
+        #     if any(labels[i] == labels[nn] for nn in nns):
+        #         correct += 1
+        #     cnt += 1
         accs.append(correct/cnt)
     return names, accs
 
@@ -265,7 +281,7 @@ def train(epochs,ctx):
         if val_accs[0] > best_val:
             best_val = val_accs[0]
             viz.log('Saving {0}'.format(opt.save_model_prefix))
-            net.save_parameters('%s.params' % opt.save_model_prefix)
+            net.save_parameters('checkpoints/%s.params' % opt.save_model_prefix)
     return best_val
 
 

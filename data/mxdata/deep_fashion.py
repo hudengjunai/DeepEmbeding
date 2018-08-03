@@ -37,41 +37,49 @@ class DeepInClassFashion(Dataset):
         self.batch_size = batch_size
         self._transform = transform
         self.is_train = is_train
-        self.train_ids = set()
+        self.train_ids = []
         self.boxes = {} # a dictionary store {key:path,value:bbox}
+        self.test_ids = set() # for super_type to subtract
         self.test_images2id=[]# a list to store[(path,id),(path,id)]
-        with open(os.path.join(self.root,'Anno','list_item_inshop.txt.'),'r') as f_instance:
+        with open(os.path.join(self.root,'Anno','list_item_inshop.txt'),'r') as f_instance:
             self.instance_count = int(f_instance.readline().strip())
             #self.instance_ids = list(f_instance.readlines())
-            self.images_files = [ [] for _ in range(self.instance_count)]
+            self.images_files = [ [] for _ in range(self.instance_count+1)]
+
         with open(os.path.join(self.root,'Anno','list_eval_partition.txt'),'r') as f_parti:
-            f_instance.readline() # read pictures number
-            f_instance.readline() # read information
+            f_parti.readline() # read pictures number
+            f_parti.readline() # read information
             train_ids = []  # will use counter to duplicate checking
-            for line in f_instance.readlines():
-                path,item_id,status = line.strip().split(' ')
+            for line in f_parti.readlines():
+                path,item_id,status = [ i for i in filter(lambda x:x is not '',line.strip().split(' '))]
                 int_id = int(item_id.split('_')[-1])
-                if status is 'Train':
+                path = str(path)
+                if status == 'train':
                     self.images_files[int_id].append(path)
-                    self.train_ids.add(int_id)
+                    self.train_ids.append(int_id)
                 else:
                     self.test_images2id.append((path,int_id))
+                    self.test_ids.add(int_id)
             # count train_ids and its distribution
-
+        #post precessing for train_ids
+        self.train_ids_list = list(set(self.train_ids))
+        count = Counter(self.train_ids)
+        self.train_ids_count = np.array([count[int_id] for int_id in self.train_ids_list])
+        self.train_ids_dist = self.train_ids_count/sum(self.train_ids_count)
 
         with open(os.path.join(self.root,'Anno','list_bbox_inshop.txt'),'r') as f_bbox:
             f_bbox.readline() # read count
             f_bbox.readline() # read description
             for line in f_bbox.readlines():
                 list_info = line.strip().split(' ')
-                path,box = list_info[0],list_info[-4:]
-                self.boxes[path]=box
+                path,box = str(list_info[0]),list_info[-4:]
+                self.boxes[path]=[ i for i in map(lambda x:int(x),box)] # convert to int
         #read instance ,split set,bbox data
 
-        sub_list_test = self.images_files[list(self.test_ids)]
-        self.test_len = 0
-        for small_list in sub_list_test:
-            self.test_len += len(small_list)
+        # sub_list_test = self.images_files[list(self.test_ids)]
+        # self.test_len = 0
+        # for small_list in sub_list_test:
+        #     self.test_len += len(small_list)
         self.build_structure()
 
     def build_structure(self):
@@ -83,16 +91,21 @@ class DeepInClassFashion(Dataset):
         for sexual in os.listdir(img_root):
             for clothe_type in os.listdir(os.path.join(self.root,'img',sexual)):
                 ids = os.listdir(os.path.join(self.root,'img',sexual,clothe_type))
-                self.super_types[sexual+'_'+clothe_type] = [int(instance_id.split('_')[-1]) for instance_id in ids]
+                origin_ids = [int(instance_id.split('_')[-1]) for instance_id in ids]
+                split_test = set(origin_ids) - self.test_ids
+                self.super_types[sexual+'_'+clothe_type] = list(split_test) # after split to test
         self.super_type_list = list(self.super_types.keys())
-        self.super_type_distri = [len(self.super_types[k]) for k in self.super_types.keys()]
-        self.super_type_distri /=sum(self.super_type_distri) # the distribution ,assume every id instance has 4 or five  images
+
+        self.super_type_count = np.array([len(self.super_types[k]) for k in self.super_types.keys()])
+        #containing classes count in a super type
+
+        self.super_type_distri =self.super_type_count/sum(self.super_type_count) # the distribution ,assume every id instance has 4 or five  images
 
     def __len__(self):
         if self.is_train:
-            return len(self.train_ids)
+            return 1000
         else:
-            return self.test_len
+            return 4000 # to many picture to valid
 
     def sampled_batch_data(self):
         """choose an super_types,
@@ -102,7 +115,7 @@ class DeepInClassFashion(Dataset):
         labels =[]
         num_groups = self.batch_size //self.batch_k
         super_id = np.random.choice(self.super_type_list,size=1,replace=False,\
-                                    p=self.super_type_distri)
+                                    p=self.super_type_distri)[0]
         sampled_ids = np.random.choice(self.super_types[super_id],\
                                        size=num_groups,replace=False)
         #the sampled_ids is like[1,2,5,45,23] in a super_type
@@ -115,7 +128,7 @@ class DeepInClassFashion(Dataset):
                 )
             except Exception as e:
                 continue
-            batch += img_fname
+            batch += img_fname.tolist()
             labels += [i]*self.batch_k
         return batch,labels # format like img/man/short/id_xxxx01/01_shorts.jpg
 
@@ -129,15 +142,20 @@ class DeepInClassFashion(Dataset):
                 if image.shape[2]==1:
                     print("has gray file",file)
                     image = nd.tile(image,(1,1,3))
+                box = self.boxes.get(file,[0,0,256,256])
+                image = image[box[1]:box[3],box[0]:box[2]] # crop image in width and height
                 image = self._transform(image)
                 imagelist.append(image)
             return nd.stack(*imagelist,axis=0),nd.array(labels)
         else:
             path,class_id = self.test_images2id[index]
+            box = self.boxes.get(path, [0, 0, 256, 256]) # fetch path,id and box
             file_path = os.path.join(self.root,path)
             image = imread(file_path,to_rgb=True,flag=1)
             if image.shape[2]==1:
                 image = nd.tile(image,(1,1,3))
+
+            image = image[box[1]:box[3], box[0]:box[2]]  # crop test image
             image = self._transform(image)
             return image,class_id
 
@@ -148,7 +166,7 @@ class DeepInClassFashion(Dataset):
 
 def getDeepInClassFashion(dir_root,batch_k,batch_size):
     """three main paramter dir,batch_k,batch_size"""
-    train_data = DeepInClassFashion(dir_root=dir_root,batch_k=batch_k,batch_size=batch_size,is_train=False,\
+    train_data = DeepInClassFashion(dir_root=dir_root,batch_k=batch_k,batch_size=batch_size,is_train=True,\
                               transform=default_transform)
     test_data = DeepInClassFashion(dir_root=dir_root,batch_k=batch_k,batch_size=batch_size,is_train=False,\
                               transform=test_transform)
@@ -166,16 +184,16 @@ class DeepCrossClassFashion(DeepInClassFashion):
         batch = []
         labels = []
         num_groups = self.batch_size//self.batch_k
-        sampled_ids = np.random.choice(list(self.train_ids),size=num_groups,replace=False)
+        sampled_ids = np.random.choice(self.train_ids_list,size=num_groups,replace=False,p=self.train_ids_dist)
         for i in sampled_ids:
             try:
                 img_fnames = np.random.choice(self.images_files[i],\
                                              size=self.batch_k,replace=False)
             except Exception as e:
                 continue
-            batch += img_fnames
+            batch += img_fnames.tolist()
             labels += [i]*self.batch_k
-        return batch,labels
+        return batch, labels
 
 def getDeepCrossClassFashion(dir_root,batch_k,batch_size):
     train_data = DeepCrossClassFashion(dir_root,batch_k,batch_size=batch_size,\
@@ -188,15 +206,15 @@ def getDeepCrossClassFashion(dir_root,batch_k,batch_size):
 
 
 if __name__ == '__main__':
-    train_data = DeepInClassFashion(dir_root='data/',batch_k=4,batch_size=80,is_train=True,\
+    train_data = DeepInClassFashion(dir_root='data/DeepInShop',batch_k=4,batch_size=80,is_train=True,\
                                transform=default_transform)
-    test_data = DeepCrossClassFashion(dir_root='data/',batch_k=4,batch_size=80,is_train=False,\
+    test_data = DeepCrossClassFashion(dir_root='data/DeepInShop',batch_k=4,batch_size=80,is_train=False,\
                                       transform=test_transform)
 
     data = train_data[0]
-    assert(data[0][0].shape[0]==80)
+    print('train data x shape',data[0].shape,'training data y shape ',data[1].shape)
     data = test_data[0]
-    assert(data[0].shape[0]==80)
+    print('test data x shape',data[0].shape,'training data y shape',data[1])
 
 
 

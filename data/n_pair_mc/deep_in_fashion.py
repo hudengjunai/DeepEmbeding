@@ -23,4 +23,4 @@ default_transform  = T.Compose([
 ])
 
 
-class DeepFashionTorch(Dataset):
+
