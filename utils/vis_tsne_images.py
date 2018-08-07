@@ -67,18 +67,19 @@ def generate_tsne(activations):
     X_2d /= X_2d.max(axis=0)
     return X_2d
 
-def visualize(im_files_list,features=None,tsne_size=20000,crop_size=100):
+def visualize(im_files_list,features,data_dir,tsne_size=20000,crop_size=100):
     """
     visualize t-sne data
     :param im_files_list: image file list
     :param features: image features numpy.ndarray shape (n,512)
     :return:
     """
-    print("dimension deduction from 512 features ...")
+    print("dimension deduction from  features ...")
     feature_2d = generate_tsne(features)
+    np.save('fashion.npy',feature_2d)
     #feature_2d = np.load('x2d.npy')
     print("build t-sne image ... ...")
-    save_tsne_grid(im_files_list, feature_2d, tsne_size,crop_size,'data/Stanford_Online_Products')
+    save_tsne_grid(im_files_list, feature_2d, tsne_size,crop_size,data_dir)
 
 
 def nmi(gt_class,features):
@@ -90,7 +91,14 @@ def nmi(gt_class,features):
     """
 
     gt_class = gt_class - min(gt_class)
-    n_cluster = len(set(gt_class))
+    n_cluster = len(set(gt_class)) #gt_class from 0 to n_cluster
+    #convert
+    st_class = set(gt_class)
+    kv={}
+    for k in st_class:
+        kv[k]=len(kv)
+    gt_class = np.array([kv[k] for k in gt_class])
+
     model = KMeans(n_clusters=n_cluster)
     Y=model.fit(features) # this would take 40 minutes
     cl_class = Y.labels_
@@ -100,7 +108,7 @@ def nmi(gt_class,features):
 
 
 
-if __name__=='__main__':
+def vis_ebay_n_pair():
     """
     read compute data and visualize t-sne picture,then comput nmi index 
     """
@@ -116,10 +124,24 @@ if __name__=='__main__':
     image_id_path= pd.read_table(test_info_file, header=0, delim_whitespace=True)
     file_list = np.array(image_id_path.path)
 
-    #visualize(file_list,vectors)
+    visualize(file_list,vectors,'data/Stanford_Online_Products')
     file_class = np.array(image_id_path.class_id)
     file_class = file_class.astype(np.int32)
     nmi(file_class,vectors)
 
 
+def vis_deep_fashon_margin():
+    feature_file = 'checkpoints/deepfashion.csv'
+    test_info_file = 'checkpoints/fashion_test.txt'
+    features = pd.read_csv(feature_file,header=None)
+    vectors = np.array(features.iloc[:,2:])
+    gt_class = np.array(features.iloc[:,1],dtype=np.int32)
+    image_path_id = pd.read_table(test_info_file,header=None,sep=',')
+    file_list = np.array(image_path_id.iloc[:,0])
+    #visualize(file_list,vectors,'data/DeepInShop')
+    nmi(gt_class,vectors)
+
+
+if __name__=='__main__':
+    vis_deep_fashon_margin()
 

@@ -35,4 +35,43 @@ Deep Metric Learning mile-stone paper:
 
 
 
+## 20180803
+## 本周工作
+### Street2Shop图像检索问题  
+- 使用Margin-based loss 方法train DeepFashion InShop 数据集,recall@1 = 0.7  
+- 编写DeepFashion InShop服装数据的Dataset，代码参见：https://github.com/EigenLab/DeepEmbeding/blob/master/data/mxdata/deep_fashion.py
+- 分别测试了Stanford_Online_Products的InClass和CrossClass采样数据加载方式，通过训练测试发现，InClass方式训练模型的检索效果较好，
+训练log记录参见：http://hpc3.yud.io:8088/ 中mx_Margin_Ebay_InClass和mx_Margin_EbayCross
 
+### DaVinCi Relayout(王鑫远)  
+- 开发了标注结果复核功能，可以通过浏览器核查之前标定过的PSD文件。
+- 初步验证了搜索+规则调整的方案可行性，在接受604份标注数据后，接收用户的主图和重拍版需求，在长条状排版需求排版效果较好。
+- 为提升重排版规则粒度，对标定的PSD文件进行抽象分类。针对每一类人工设计规则。
+
+### 抠图算法（贺浩）  
+- 阅读了Mask-rcnn，FCN系列图像分割算法论文及代码实现。
+- 查阅graph-cut，grab-cut等系列交互式抠图算法。
+
+## 下周工作
+- 调参训练一个检索效果好的模型，使用Mxnet-model-server部署DeepEmbeding.能对服装图片提取128维向量特征。
+- 使用之前的sku检索数据，通过DeepEmbeding后建立NNSearch索引，通过A/B test测试和之前基于VGG分类模型bottleneck特征提取的方法进行比较,
+比较recall@K和RPS 
+
+
+
+                                  1.nn&dl,http://neuralnetworksanddeeplearning.com/ 全部看，中文在tensorflow社区里面有（http://www.tensorfly.cn/home/）。
+2.pytorch或者tensorflow教程，着重跑一下mnist cifar-10,数据加载，数据增强,指标计算。中文版本书籍有https://github.com/chenyuntc/pytorch-book 
+3.cs231n 斯坦福大学 计算机视觉及深度学习课程. (deeplearning for cv 必看经典，基础内容很多，第七节课才讲卷积)（英语不好的可以看李宏毅也行）
+4.深度学习(花书). (描述的很有深度，参数初始化，可视化，优化方法，其中鞍点/通用逼近/局部极小值/hessian也可以参见李宏毅的DeepLearning Theory系列课程)
+5.深度学习论文阅读roadmap.Deep-Learning-Papers-Reading-Roadmap，github可以搜到。
+6.机器学习（周志华）.可以对照机器学习实战或者scikit-learn源码看,也可以看safari上的scikit-learn&tensorflow教程，orange库好像也不错。
+7.动手学习深度学习（李沐）。http://zh.gluon.ai/chapter_introduction/index.html。 有教学视频和源码。
+8.博客：http://colah.github.io（google的一个工程师写的） https://zhuanlan.zhihu.com/p/25628246（百度的一个工程师写的）
+9.应用方向：大体参见safari-book上的书，deeplearning and computer-vision,17年末出的，引用的paper比较新，基本囊括了流行的应用，该书是用tensorflow写的，包括了目标检测，图像检索，图像分割，图文理解等领域。
+10.源码：caffe源码，caffe源码相对比较成熟稳定，尤其是有反向传播的完整代码；可以编译一个debug版本，cpu条件下调试执行mnist案例看其中的数据结构和流程。
+         其他代码没看过，mxnet声称兼具静态计算图和动态计算图的优点，应该值得一看，tensorflow不熟。（如果为了看逻辑实现，看mxnet或者pytorch就行，如果看工业实现，推荐caffe
+11.论文查找：paper-weekly,google-scholar.
+12.一些awesome 资源：https://github.com/kjw0612/awesome-deep-vision  
+                     https://github.com/guillaume-chevalier/Awesome-Deep-Learning-Resources
+                     yotube网红，siraj ravel。
+13.一些库：visdom绘图不错,cupy作为numpy的计算加速,fire作为argparse的替换   

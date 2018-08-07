@@ -28,3 +28,4 @@ plt.show()
 img_path= r'C:\Users\Dengjun\Pictures\a.jpg'
 img = imread(img_path)
 print(img.shape)
+

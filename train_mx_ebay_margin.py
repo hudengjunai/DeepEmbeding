@@ -70,6 +70,8 @@ parser.add_argument('--use_viz',action='store_true',
                     help='enable using visualization to vis the loss curve')
 parser.add_argument('--name',type=str,default='cub200',
                     help='the train instance name')
+parser.add_argument('--load_model_path',type=str,default='checkpoints/Fashion_In.params',
+                    help='the trained model')
 
 opt = parser.parse_args()
 opt.save_model_prefix = opt.name # force save model prefix to name
@@ -80,6 +82,7 @@ np.random.seed(opt.seed)
 
 batch_size = opt.batch_size
 
+os.environ['CUDA_VISIBLE_DEVICES']='0,1,2,3'
 gpus = [] if opt.gpus is None or opt.gpus is '' else [
     int(gpu) for gpu in opt.gpus.split(',')]
 num_gpus = len(gpus)
@@ -285,8 +288,49 @@ def train(epochs,ctx):
     return best_val
 
 
+def extract_feature():
+    """
+    extract data feature vector and save
+    :param model:
+    :param dataloader:
+    :return:
+    """
+    global net
+    deepfashion_csv = 'checkpoints/deepfashion.csv'
+    net.initialize()
+    net.collect_params().reset_ctx(context)
+    net.load_parameters(opt.load_model_path,ctx=context)
+    import csv
+    f = open(deepfashion_csv,'w')
+    writer = csv.writer(f,dialect='excel')
+
+    for i,batch in tqdm(enumerate(val_dataloader)):
+        batch_size = batch[0].shape[0]
+        data = gluon.utils.split_and_load(batch[0], ctx_list=context, batch_axis=0)
+        label = gluon.utils.split_and_load(batch[1], ctx_list=context, batch_axis=0)
+        # after split data is list of two data batch
+        small_batch_feature = []
+        for x in data:
+            feature = net.extract(x)
+            small_batch_feature.append(feature)
+        image_id = np.arange(i*batch_size,(i+1)*batch_size).reshape(-1,1) # prepare the image_id
+        vector = nd.concatenate(small_batch_feature,axis=0).asnumpy() # concatenate the feature
+        label = np.array([x.asnumpy() for x in label]).reshape(-1,1)
+        result = np.hstack((image_id,label,vector))
+        writer.writerows(result)
+    print("finished extract feature")
+    f.close()
+    return "True finished"
+
+
+
+
+
 if __name__ == '__main__':
     import ipdb
-    #ipdb.set_trace()
-    best_val_recall = train(opt.epochs,context)
-    print("Best validation Recall@1:%.2f"%(best_val_recall))
+    ipdb.set_trace()
+    #best_val_recall = train(opt.epochs,context)
+    #print("Best validation Recall@1:%.2f"%(best_val_recall))
+
+    result = extract_feature()
+    print(result)

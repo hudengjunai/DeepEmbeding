@@ -1,0 +1,1 @@
+nohup python train_mx_ebay_margin.py --gpus=2 --epochs=40 --steps=14,16,20,30 --batch-k=4 --batch-size=100 --use_pretrained --use_viz --name=Fashion_In2 --data=DeepFashionInClass >mytrainDeep_Inclass2.log 2>&1 &

@@ -82,6 +82,19 @@ class DeepInClassFashion(Dataset):
         #     self.test_len += len(small_list)
         self.build_structure()
 
+
+    def write_test_files(self):
+        """write the test files and label id"""
+        import csv
+        f = open('checkpoints/fashion_test.txt','w')
+        writer = csv.writer(f,dialect='excel')
+        print(len(self.test_images2id))
+        print("begin to write")
+        writer.writerows(self.test_images2id)
+        f.close()
+
+
+
     def build_structure(self):
         """build the folder to id structure dataset,
         construct the super class structure to select"""
@@ -105,7 +118,7 @@ class DeepInClassFashion(Dataset):
         if self.is_train:
             return 1000
         else:
-            return 4000 # to many picture to valid
+            return len(self.test_images2id) # to many picture to valid
 
     def sampled_batch_data(self):
         """choose an super_types,
@@ -116,8 +129,12 @@ class DeepInClassFashion(Dataset):
         num_groups = self.batch_size //self.batch_k
         super_id = np.random.choice(self.super_type_list,size=1,replace=False,\
                                     p=self.super_type_distri)[0]
-        sampled_ids = np.random.choice(self.super_types[super_id],\
-                                       size=num_groups,replace=False)
+        try:
+            sampled_ids = np.random.choice(self.super_types[super_id],\
+                                           size=num_groups,replace=False)
+        except Exception as e:
+            sampled_ids = self.super_types[super_id] # type is list small than 25
+
         #the sampled_ids is like[1,2,5,45,23] in a super_type
         for i in sampled_ids:
             try:
@@ -208,13 +225,14 @@ def getDeepCrossClassFashion(dir_root,batch_k,batch_size):
 if __name__ == '__main__':
     train_data = DeepInClassFashion(dir_root='data/DeepInShop',batch_k=4,batch_size=80,is_train=True,\
                                transform=default_transform)
-    test_data = DeepCrossClassFashion(dir_root='data/DeepInShop',batch_k=4,batch_size=80,is_train=False,\
-                                      transform=test_transform)
-
-    data = train_data[0]
-    print('train data x shape',data[0].shape,'training data y shape ',data[1].shape)
-    data = test_data[0]
-    print('test data x shape',data[0].shape,'training data y shape',data[1])
+    # test_data = DeepCrossClassFashion(dir_root='data/DeepInShop',batch_k=4,batch_size=80,is_train=False,\
+    #                                   transform=test_transform)
+    #
+    # data = train_data[0]
+    # print('train data x shape',data[0].shape,'training data y shape ',data[1].shape)
+    # data = test_data[0]
+    # print('test data x shape',data[0].shape,'training data y shape',data[1])
+    train_data.write_test_files()
 
 
 

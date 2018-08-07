@@ -178,6 +178,12 @@ class MarginNet(Block):
         z = self.sampled(z)
         return z
 
+    def extract(self,x):
+        z = self.base_net(x)
+        z = self.dense(z)
+        z = self.normalize(z)
+        return z # just return feature vector
+
 
 class MarginLoss(gluon.loss.Loss):
     r"""Margin based loss.
