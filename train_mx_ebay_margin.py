@@ -296,7 +296,7 @@ def extract_feature():
     :return:
     """
     global net
-    deepfashion_csv = 'checkpoints/deepfashion.csv'
+    deepfashion_csv = 'checkpoints/deepfashion.csv' # write vector to this file
     net.initialize()
     net.collect_params().reset_ctx(context)
     net.load_parameters(opt.load_model_path,ctx=context)
@@ -329,8 +329,8 @@ def extract_feature():
 if __name__ == '__main__':
     import ipdb
     ipdb.set_trace()
-    #best_val_recall = train(opt.epochs,context)
-    #print("Best validation Recall@1:%.2f"%(best_val_recall))
+    best_val_recall = train(opt.epochs,context)
+    print("Best validation Recall@1:%.2f"%(best_val_recall))
 
-    result = extract_feature()
-    print(result)
+    # result = extract_feature()
+    # print(result)

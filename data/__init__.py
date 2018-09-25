@@ -8,3 +8,4 @@ from .mxdata.mxcub200 import cub200_iterator
 from .mxdata.online_products import getEbayCrossClassData,getEbayInClassData
 from .mxdata.mxcub_simple import getCUB200
 from .mxdata.deep_fashion import getDeepCrossClassFashion,getDeepInClassFashion
+from .hashdata.hash_tri_files import get_hash_dataloader

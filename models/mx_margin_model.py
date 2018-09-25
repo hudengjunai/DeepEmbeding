@@ -163,7 +163,7 @@ class MarginNet(Block):
     Outputs:
         - The output of DistanceWeightedSampling.
     """
-    def __init__(self, base_net, emb_dim, batch_k, **kwargs):
+    def __init__(self, base_net, emb_dim, batch_k=5, **kwargs):
         super(MarginNet, self).__init__(**kwargs)
         with self.name_scope():
             self.base_net = base_net

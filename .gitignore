@@ -8,6 +8,9 @@ data/DeepInShop
 data/cub200_2011
 data/Stanford_Online_Products
 data/CUB_200_2011
+data/hashdata/coco
+data/hashdata/nus_wide
+*.png
 *.npy
 *.csv
 .ipynb_checkpoints/
@@ -15,3 +18,4 @@ __pycache__/
 *.pyc
 *.params
 *.jpg
+*.jpeg
