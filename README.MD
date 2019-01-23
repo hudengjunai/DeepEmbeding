@@ -13,7 +13,7 @@ DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（De
 2.直接使用DeepHash的方法，编码成汉明码，直接进行距离计算。相对于DeepMetric+VQ的非监督量化编码过程，
 DeepHash力求使用监督学习的方法得到量化编码（汉明码），减少在向量量化步骤的信息损失，达到更好的特征表达能力。
 3.异同比较：DeepMetric和DeepHash都面向图像检索，相同点是：目的相同，学习映射函数；基础方法相似：基于深度学习的方法，目标函数类似：使用了triplet-loss等典型目标函数。
-不同点是：输出向量不同：前者是dense-vector,后者是汉明码；精度不同：前者可以提供高精度，能面向reID领域（FaceReID，PersonReID)，后者面向近似搜索。存储容量不同：前者如果不使用ANNS压缩加速，很难扩大容量。后者的compact编码占用空间小，计算速度快。
+不同点是：输出向量不同：前者是dense-vector,后者是汉明码；精度不同：前者可以提供高精度，能面向reID领域（FaceReID，PersonReID),可以使用GPU穷举搜索方法，搜索更精确，后者面向近似搜索。存储容量不同：前者如果不使用ANNS压缩加速，很难扩大容量。后者的compact编码占用空间小，计算速度快。
 
 ---  
 ## Deep Metric Learning for Image retrieval
@@ -69,11 +69,11 @@ L1 Triplet Batch_hard softmargin [In Defense of the Triplet Loss for Person Re-I
   
 3.run with mxnet-server or pytorch-flask-server
 
-4.train result in t-sne and metric
-[margin_based loss :DeepFashion](https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w)
-计算指标：nmi=0.866
-[Mc-n-pair loss:StanfordOnlineProduct](https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ)
-计算指标：nmi=0.830
+## Train result in t-sne jpeg and nmi (normal mutal information) metric
+- [margin_based loss :DeepFashion](https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w)https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w  
+计算指标：nmi=0.866  
+- [Mc-n-pair loss:StanfordOnlineProduct](https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ)https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ  
+计算指标：nmi=0.830  
 ## Future work
 __Deep Adversarial Metric Learning__  
 Deep Metric learning cannot get full used the easy negative examples,to in [Deep Adversarial Metirc Learning](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf) proposal a new framework called DAML  
@@ -111,6 +111,13 @@ python train_hash.py --params
 7.[DCH:Deep Cauchy Hashing for Hamming Space Retrieval](http://openaccess.thecvf.com/content_cvpr_2018/html/Cao_Deep_Cauchy_Hashing_CVPR_2018_paper.html)  
 
 
+## Visual-semantic-align embedding(cross modal retrieval)
+1.[VSE++: Improving Visual-Semantic Embeddings with Hard Negatives](http://arxiv.org/abs/1707.05612)  
+2.[Dual-Path Convolutional Image-Text Embedding with Instance Loss](http://arxiv.org/abs/1711.05535)  
+```bash
+python train_vse.py --params
+```
+
 ## Others retrieval method
 1.Sketch based [Deep Sketch Hashing: Fast Free-hand Sketch-Based Image Retrieval](https://github.com/ymcidence/DeepSketchHashing)  
 2.Text cross modal based [Deep Cross-Modal Hashing](https://github.com/jiangqy/DCMH-CVPR2017)
@@ -123,8 +130,31 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 - [GIST1M](http://corpus-texmex.irisa.fr/) typical 512-dim gist vector
 
 ### papers
+-- PQ based  
+1.[Product Quantization for Nearest Neighbor Search](http://ieeexplore.ieee.org/document/5432202/)  
+2.[Optimized Product Quantization](http://ieeexplore.ieee.org/document/6678503/)  
+3.[Revisiting the Inverted Indices for Billion-Scale Approximate Nearest Neighbors](http://arxiv.org/abs/1802.02422)  
+4.[The Inverted MultiIndex](http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf)  
+5.[Polysemous codes](https://arxiv.org/abs/1609.01882)  
 
+-- Graph Based  
+1.[Approximate nearest neighbor algorithm based on navigable small world graphs](https://linkinghub.elsevier.com/retrieve/pii/S0306437913001300)   
+2.[Efficient and robust approximate nearest neighbor search using hierarchical Navigable Small World graphs](http://arxiv.org/abs/1603.09320)   
+7.[EFANNA : An Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228)  
+8.[A Revisit on Deep Hashings for Large-scale Content Based Image Retrieval](http://arxiv.org/abs/1711.06016)   
+-- Hamming Code  
+1.[Fast Exact Search in Hamming Space with Multi-Index Hashing](http://arxiv.org/abs/1307.2982)  
+2.[Fast Nearest Neighbor Search in the Hamming Space](http://link.springer.com/10.1007/978-3-319-27671-7_27)   
+4.[Web-Scale Responsive Visual Search at Bing](http://arxiv.org/abs/1802.04914)  
+5.[Recurrent Binary Embedding for GPU-Enabled Exhaustive Retrieval from Billion-Scale Semantic Vectors](http://arxiv.org/abs/1802.06466) 
 ### library
-
-
+1.[faiss]()  
+2.[EFANNA]()  
 ### others
+some famous group in Information Retrieval,ANNS,DeepHashing,Deep Metric
+1.Yandex ,Google  
+2.The Institute of Applied Physics of the Russian Academy of Sciences.
+3.Facebook AI Research  
+4.Baidu  
+5.Nanjing University , Tsinghua University  
+
