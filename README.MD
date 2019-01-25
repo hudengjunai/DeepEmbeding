@@ -1,62 +1,49 @@
-# Deep Embedding Learning
+# Deep Embedding Learning for Image Retrieval
 ---
 # Deep Embedding Introduction
 ---
-DeepEmbedding 是使用深度学习的方法把多种媒体映射嵌入到相同向量空间，在统一空间中进行搜索的技术。
-# About This Project  
+DeepEmbedding 是使用深度学习的方法把多种媒体映射嵌入到相同向量空间，在统一空间中进行搜索的技术。  
+本项目通过视觉级别搜索，细粒度类别（实例检索）和图像-文本互搜的方式来测试通用多媒体检索。
+# 图像检索问题的一般解法
 ---
 DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（DeepHash）的方法学习关系高保持的空间映射函数，能将视觉空间映射到低维嵌入空间，主要解决上述深度度量学习的第一个问题。
-第二个问题解决方案可参见ANNS（近似邻近搜索）[NNSearchService](https://github.com/EigenLab/NNSearchService) 
-典型的DeepEmbedding有两种思路(根据提取特征为float值densevector或者汉明码)： 
-1.使用DeepMetric+VQ的方法,先提取densevector（使用FaceNet等）,如果搜索精度要求高，则使用GPU进行精确距离计算并排序，这是一种精确邻近搜索方法，
-比如人脸比对，另一种是近似邻近搜索，使用VQ向量量化的方法，在损失部分精度情况下，加速搜索过程，也即ANNS，这种方法简称Deep-Metric+VQ.  
-2.直接使用DeepHash的方法，编码成汉明码，直接进行距离计算。相对于DeepMetric+VQ的非监督量化编码过程，
-DeepHash力求使用监督学习的方法得到量化编码（汉明码），减少在向量量化步骤的信息损失，达到更好的特征表达能力。
-3.异同比较：DeepMetric和DeepHash都面向图像检索，相同点是：目的相同，学习映射函数；基础方法相似：基于深度学习的方法，目标函数类似：使用了triplet-loss等典型目标函数。
-不同点是：输出向量不同：前者是dense-vector,后者是汉明码；精度不同：前者可以提供高精度，能面向reID领域（FaceReID，PersonReID),可以使用GPU穷举搜索方法，搜索更精确，后者面向近似搜索。存储容量不同：前者如果不使用ANNS压缩加速，很难扩大容量。后者的compact编码占用空间小，计算速度快。
-
+第二个问题解决方案可参见ANNS（近似邻近搜索）[NNSearchService](https://github.com/EigenLab/NNSearchService) ，如果需要后续的搜索拓展，可使用SIFT局部特征匹配验证和搜索拓展。
 ---  
-## Deep Metric Learning for Image retrieval
-Deep Metric Learning for image retrieval:
+## Note
+- 本项目实现了基于Multi-npair-loss的度量学习应用于检索和基于Sampling margin loss的方法进行检索
+- 具体复现参见论文Triplet loss[FaceNet: ](http://arxiv.org/abs/1503.03832)  
+[N-pair loss](http://www.nec-labs.com/uploads/images/Department-Images/MediaAnalytics/papers/nips16_npairmetriclearning.pdf)  
+[Margin lossSampling Matters in Deep Emebedding Learning](https://www.cs.utexas.edu/~cywu/projects/sampling_matters/)   
+[BatchHard](https://arxiv.org/abs/1703.07737)   
 
-note:
-this project implement the multi-class N-pair loss,Margin-base loss and HDC
 
-the origin paper is :
-
-Triplet loss[FaceNet: A Unified Embedding for Face Recognition and Clustering](http://arxiv.org/abs/1503.03832)
-
-N-pair loss[Improved Deep Metric Learning with Multi-class N-pair Loss Objective](http://www.nec-labs.com/uploads/images/Department-Images/MediaAnalytics/papers/nips16_npairmetriclearning.pdf)
-
-Margin loss[Sampling Matters in Deep Emebedding Learning](https://www.cs.utexas.edu/~cywu/projects/sampling_matters/)
-
-L1 Triplet Batch_hard softmargin [In Defense of the Triplet Loss for Person Re-Identification](https://arxiv.org/abs/1703.07737)
 
 # Dataset
 
-[CUB200_2011](http://www.vision.caltech.edu/visipedia/CUB-200.html): A small part of ImageNet
+[CUB200_2011](http://www.vision.caltech.edu/visipedia/CUB-200.html): A small part of ImageNet  
+[LFW](http://vis-www.cs.umass.edu/lfw/):face dataset  
+[StanfordOnlineProducts](http://cvgl.stanford.edu/projects/lifted_struct/): a lot of types of products(furniture,bicycle,cups)  
+[Street2Shop](http://www.tamaraberg.com/street2shop/):products data set from ebay  
+[DeepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html):all are colthes  
 
-[LFW](http://vis-www.cs.umass.edu/lfw/):face dataset
+# 实验结果
+- 在StanfordOnlineProduct训练，计算NMI聚类指标 nmi=0.866，对验证集的向量嵌入进行T-SNE降维后可以看出，降维图像约 43M，百度网盘链接在下：
+- [margin_based loss :DeepFashion](https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w)https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w  
+计算指标：nmi=0.866  
+- [Mc-n-pair loss:StanfordOnlineProduct](https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ)https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ  
+计算指标：nmi=0.830  
 
-[StanfordOnlineProducts](http://cvgl.stanford.edu/projects/lifted_struct/): a lot of types of products(furniture,bicycle,cups)
 
-[Street2Shop](http://www.tamaraberg.com/street2shop/):products data set from ebay
-
-[DeepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html):all are colthes
-
-
-# Deep embeding usage:
+# 实验拓展
+# 深度学习应用图像检索的经典应用
 - Face indentification: deep metric learning for face cluster,from [FaceNet](http://arxiv.org/abs/1503.03832) to [SphereFace](http://ieeexplore.ieee.org/document/8100196/)
-
 - Person ReIdentification:deep metric learning for Pedestrian Re-ID,from [MARS](https://pdfs.semanticscholar.org/c038/7e788a52f10bf35d4d50659cfa515d89fbec.pdf) to [NPSM&SVDNet](https://blog.csdn.net/u013982164/article/details/79608100)
-
 - Vehicle Search:deep metric learning for fake-licensed car or Vehicle retrieval.
-
 - Street2Products:search fashion clothe from street photos or in-shop photos,namely visual-search.from [DeepRanking](https://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf) to [DAML](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf)
 
-# About DeepMetric project
-1.download data store in data directory
-2.train model with different loss type and dataset
+# 关于本项目的使用
+1.下载相应的数据集
+2.采用不同的loss类型对模型进行训练
   run train cub200 model
   ```angular2html
   nohup python train_mx_ebay_margin.py --gpus=1 --batch-k=5 --use_viz --epochs=30 --use_pretrained --steps=12,16,20,24 --name=CUB_200_2011 --save-model-prefix=cub200 > mycub200.out 2>&1 &
@@ -67,19 +54,18 @@ L1 Triplet Batch_hard softmargin [In Defense of the Triplet Loss for Person Re-I
 ```
 
   
-3.run with mxnet-server or pytorch-flask-server
+3.后续工作：
+  - 测试R-MAC NetVLAD等网络在视觉检索中的效果和评测
+  - 测试使用GAN的方法增强检索效果
+  ```angularjs
 
-## Train result in t-sne jpeg and nmi (normal mutal information) metric
-- [margin_based loss :DeepFashion](https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w)https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w  
-计算指标：nmi=0.866  
-- [Mc-n-pair loss:StanfordOnlineProduct](https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ)https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ  
-计算指标：nmi=0.830  
-## Future work
-__Deep Adversarial Metric Learning__  
-Deep Metric learning cannot get full used the easy negative examples,to in [Deep Adversarial Metirc Learning](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf) proposal a new framework called DAML  
-__DeepMetric and Deep Hashing Apply__  
- apply method to Fashion,vehicle and Person-ReID domain  
-__Construct a datasets__ crawl application-domain data  
+    __Deep Adversarial Metric Learning__  
+    Deep Metric learning cannot get full used the easy negative examples,to in [Deep Adversarial Metirc Learning](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf) proposal a new framework called DAML  
+    __DeepMetric and Deep Hashing Apply__  
+     apply method to Fashion,vehicle and Person-ReID domain  
+    __Construct a datasets__ crawl application-domain data  
+```
+
 
 ## Deep Metric Learning mile-stone paper:  
 1.[DrLIM:Dimensionality Reduction by Learning an Invariant Mapping](http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf)  
@@ -93,7 +79,8 @@ __Construct a datasets__ crawl application-domain data
 9.[SphereFace:Deep Hypersphere Embedding for Face Recognition](http://ieeexplore.ieee.org/document/8100196/)
 
 
-# About the DeepHash project 
+# 部分DeepHash的工作  
+DeepHash能将图片直接哈希到汉明码，使用faiss的IVF Binary 系列搜索加速，通过存储量大大减少。
 
 ## ReImplementation of HashNet
 ```angular2html
@@ -111,34 +98,34 @@ python train_hash.py --params
 7.[DCH:Deep Cauchy Hashing for Hamming Space Retrieval](http://openaccess.thecvf.com/content_cvpr_2018/html/Cao_Deep_Cauchy_Hashing_CVPR_2018_paper.html)  
 
 
-## Visual-semantic-align embedding(cross modal retrieval)
+## 视觉和文本共同嵌入 Visual-semantic-align embedding(cross modal retrieval)
 1.[VSE++: Improving Visual-Semantic Embeddings with Hard Negatives](http://arxiv.org/abs/1707.05612)  
 2.[Dual-Path Convolutional Image-Text Embedding with Instance Loss](http://arxiv.org/abs/1711.05535)  
 ```bash
 python train_vse.py --params
 ```
 
-## Others retrieval method
+## 其他类型的搜索方式
 1.Sketch based [Deep Sketch Hashing: Fast Free-hand Sketch-Based Image Retrieval](https://github.com/ymcidence/DeepSketchHashing)  
 2.Text cross modal based [Deep Cross-Modal Hashing](https://github.com/jiangqy/DCMH-CVPR2017)
 
-## ANNS
+## 近似近邻搜索加速
 ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery database.
-#### databse
+测试数据集
 - [SIFT1M](http://corpus-texmex.irisa.fr/) typical 128-dim sift vector
 - [DEEP1B](http://sites.skoltech.ru/compvision/noimi/)，proposed by yandex.inc,this is a deep descriptor
 - [GIST1M](http://corpus-texmex.irisa.fr/) typical 512-dim gist vector
 
 ### papers
 -- PQ based  
-1.[Product Quantization for Nearest Neighbor Search](http://ieeexplore.ieee.org/document/5432202/)  
-2.[Optimized Product Quantization](http://ieeexplore.ieee.org/document/6678503/)  
+1.将传统的标量量化，转成分段乘积量化[Product Quantization for Nearest Neighbor Search](http://ieeexplore.ieee.org/document/5432202/)  
+2.类似于Cartisian Quantization，将向量整体进行旋转，使得聚类的分段坐标轴和向量对齐，聚类中心点和数据之间的重建误差小，压缩损失就小[Optimized Product Quantization](http://ieeexplore.ieee.org/document/6678503/)  
 3.[Revisiting the Inverted Indices for Billion-Scale Approximate Nearest Neighbors](http://arxiv.org/abs/1802.02422)  
-4.[The Inverted MultiIndex](http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf)  
-5.[Polysemous codes](https://arxiv.org/abs/1609.01882)  
+4.粗量化使用双倒排，可以降低聚类维度，增加聚类中心点，使用Multi-Sequence算法提高粗略命中速度[The Inverted MultiIndex](http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf)  
+5.多义码，将汉明码距离和量化中心点的距离建立映射关系，对entry-point有过滤作用 [Polysemous codes](https://arxiv.org/abs/1609.01882)  
 
 -- Graph Based  
-1.[Approximate nearest neighbor algorithm based on navigable small world graphs](https://linkinghub.elsevier.com/retrieve/pii/S0306437913001300)   
+1.可参见NSW 浏览小世界 论文，结合跳表结构构造的索引[Approximate nearest neighbor algorithm based on navigable small world graphs](https://linkinghub.elsevier.com/retrieve/pii/S0306437913001300)   
 2.[Efficient and robust approximate nearest neighbor search using hierarchical Navigable Small World graphs](http://arxiv.org/abs/1603.09320)   
 7.[EFANNA : An Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228)  
 8.[A Revisit on Deep Hashings for Large-scale Content Based Image Retrieval](http://arxiv.org/abs/1711.06016)   
@@ -148,13 +135,8 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 4.[Web-Scale Responsive Visual Search at Bing](http://arxiv.org/abs/1802.04914)  
 5.[Recurrent Binary Embedding for GPU-Enabled Exhaustive Retrieval from Billion-Scale Semantic Vectors](http://arxiv.org/abs/1802.06466) 
 ### library
-1.[faiss]()  
-2.[EFANNA]()  
-### others
-some famous group in Information Retrieval,ANNS,DeepHashing,Deep Metric
-1.Yandex ,Google  
-2.The Institute of Applied Physics of the Russian Academy of Sciences.
-3.Facebook AI Research  
-4.Baidu  
-5.Nanjing University , Tsinghua University  
+1.[faiss] 当前faiss包含IVF,IMI，PQ,OPQ,PCA,二级残差量化ReRank-PQ,HNSW,Link and Code 等各种类型的索引引擎
+2.索引格式选择：高容量，低精度 IMI+OPQ+reRank  
+              高精度，选择HNSW,当前浙大NSG索引不支持增量插入，没有采用
+
 
