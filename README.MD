@@ -1,14 +1,10 @@
 # Deep Embedding Learning for Image Retrieval
 ---
-# Deep Embedding Introduction
----
+# Deep Embedding Introduction  
 DeepEmbedding 是使用深度学习的方法把多种媒体映射嵌入到相同向量空间，在统一空间中进行搜索的技术。  
-本项目通过视觉级别搜索，细粒度类别（实例检索）和图像-文本互搜的方式来测试通用多媒体检索。
+本项目通过视觉级别搜索，细粒度类别（实例检索）和图像-文本互搜的方式来测试通用多媒体检索。  
 # 图像检索问题的一般解法  
----
-DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（DeepHash）的方法学习关系高保持的空间映射函数，能将视觉空间映射到低维嵌入空间，主要解决上述深度度量学习的第一个问题。
-第二个问题解决方案可参见ANNS（近似邻近搜索）[NNSearchService](https://github.com/EigenLab/NNSearchService) ，如果需要后续的搜索拓展，可使用SIFT局部特征匹配验证和搜索拓展。
----  
+DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（DeepHash）的方法学习关系保持的空间映射函数，能将视觉空间映射到低维嵌入空间,使用向量搜索引擎进行搜索.第一个问题为特征提取问题,即为本实验研究的问题,第二个问题为特征搜索问题.第二个问题解决方案可参见ANNS（近似邻近搜索）[NNSearchService](https://github.com/EigenLab/NNSearchService) 。  
 ## Note
 - 本项目实现了基于Multi-npair-loss的度量学习应用于检索和基于Sampling margin loss的方法进行检索
 - 具体复现参见论文Triplet loss[FaceNet: ](http://arxiv.org/abs/1503.03832)  
@@ -16,30 +12,14 @@ DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（De
 [Margin lossSampling Matters in Deep Emebedding Learning](https://www.cs.utexas.edu/~cywu/projects/sampling_matters/)   
 [BatchHard](https://arxiv.org/abs/1703.07737)   
 
-
-
-# Dataset
-
-[CUB200_2011](http://www.vision.caltech.edu/visipedia/CUB-200.html): A small part of ImageNet  
-[LFW](http://vis-www.cs.umass.edu/lfw/):face dataset  
-[StanfordOnlineProducts](http://cvgl.stanford.edu/projects/lifted_struct/): a lot of types of products(furniture,bicycle,cups)  
-[Street2Shop](http://www.tamaraberg.com/street2shop/):products data set from ebay  
-[DeepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html):all are colthes  
-
-# 实验结果
+# 实验结果 
+(可点击下载百度网盘链接,查看图片)
 - 在StanfordOnlineProduct训练，计算NMI聚类指标 nmi=0.866，对验证集的向量嵌入进行T-SNE降维后可以看出，降维图像约 43M，百度网盘链接在下：
 - [margin_based loss :DeepFashion](https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w)https://pan.baidu.com/s/1zLZX24qBb_Op1vsry4LX6w  
 计算指标：nmi=0.866  
 - [Mc-n-pair loss:StanfordOnlineProduct](https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ)https://pan.baidu.com/s/12eNTVsRFu--SYMW8P8HPfQ  
 计算指标：nmi=0.830  
 
-
-# 实验拓展
-# 深度学习应用图像检索的经典应用
-- Face indentification: deep metric learning for face cluster,from [FaceNet](http://arxiv.org/abs/1503.03832) to [SphereFace](http://ieeexplore.ieee.org/document/8100196/)
-- Person ReIdentification:deep metric learning for Pedestrian Re-ID,from [MARS](https://pdfs.semanticscholar.org/c038/7e788a52f10bf35d4d50659cfa515d89fbec.pdf) to [NPSM&SVDNet](https://blog.csdn.net/u013982164/article/details/79608100)
-- Vehicle Search:deep metric learning for fake-licensed car or Vehicle retrieval.
-- Street2Products:search fashion clothe from street photos or in-shop photos,namely visual-search.from [DeepRanking](https://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf) to [DAML](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf)
 
 # 关于本项目的使用
 1.下载相应的数据集
@@ -65,8 +45,19 @@ DeepEmbedding旨在使用深度度量学习（DeepMetric)或者深度哈希（De
      apply method to Fashion,vehicle and Person-ReID domain  
     __Construct a datasets__ crawl application-domain data  
 ```
+# Dataset
 
+[CUB200_2011](http://www.vision.caltech.edu/visipedia/CUB-200.html): A small part of ImageNet  
+[LFW](http://vis-www.cs.umass.edu/lfw/):face dataset  
+[StanfordOnlineProducts](http://cvgl.stanford.edu/projects/lifted_struct/): a lot of types of products(furniture,bicycle,cups)  
+[Street2Shop](http://www.tamaraberg.com/street2shop/):products data set from ebay  
+[DeepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html):all are colthes    
 
+# 图像检索的应用
+- Face indentification: deep metric learning for face cluster,from [FaceNet](http://arxiv.org/abs/1503.03832) to [SphereFace](http://ieeexplore.ieee.org/document/8100196/)
+- Person ReIdentification:deep metric learning for Pedestrian Re-ID,from [MARS](https://pdfs.semanticscholar.org/c038/7e788a52f10bf35d4d50659cfa515d89fbec.pdf) to [NPSM&SVDNet](https://blog.csdn.net/u013982164/article/details/79608100)
+- Vehicle Search:deep metric learning for fake-licensed car or Vehicle retrieval.
+- Street2Products:search fashion clothe from street photos or in-shop photos,namely visual-search.from [DeepRanking](https://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf) to [DAML](http://openaccess.thecvf.com/content_cvpr_2018/papers/Duan_Deep_Adversarial_Metric_CVPR_2018_paper.pdf)
 ## Deep Metric Learning mile-stone paper:  
 1.[DrLIM:Dimensionality Reduction by Learning an Invariant Mapping](http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf)  
 2.[DeepRanking:Learning fine-graied Image Similarity with DeepRanking](https://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf)  
