@@ -119,7 +119,13 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 1.可参见NSW 浏览小世界 论文，结合跳表结构构造的索引[Approximate nearest neighbor algorithm based on navigable small world graphs](https://linkinghub.elsevier.com/retrieve/pii/S0306437913001300)   
 2.[Efficient and robust approximate nearest neighbor search using hierarchical Navigable Small World graphs](http://arxiv.org/abs/1603.09320)   
 7.[EFANNA : An Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228)  
-8.[A Revisit on Deep Hashings for Large-scale Content Based Image Retrieval](http://arxiv.org/abs/1711.06016)   
+8.[A Revisit on Deep Hashings for Large-scale Content Based Image Retrieval](http://arxiv.org/abs/1711.06016)     
+9.[RobustiQ: A Robust ANN Search Method for Billion-scale Similarity Search on GPUs] (http://users.monash.edu/~yli/assets/pdf/icmr19-sigconf.pdf) .    
+10.[GGNN: Graph-based GPU Nearest Neighbor Search](https://arxiv.org/pdf/1912.01059.pdf)   
+11.[Zoom: Multi-View Vector Search for Optimizing Accuracy, Latency and Memory](https://www.microsoft.com/en-us/research/uploads/prod/2018/08/zoom-multi-view-tech-report.pdf)
+12.[Vector and Line Quantization for Billion-scale Similarity
+Search on GPUs](https://arxiv.org/pdf/1901.00275.pdf)
+
 -- Hamming Code  
 1.[Fast Exact Search in Hamming Space with Multi-Index Hashing](http://arxiv.org/abs/1307.2982)  
 2.[Fast Nearest Neighbor Search in the Hamming Space](http://link.springer.com/10.1007/978-3-319-27671-7_27)   
@@ -128,6 +134,10 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 ### library
 1.[faiss] 当前faiss包含IVF,IMI，PQ,OPQ,PCA,二级残差量化ReRank-PQ,HNSW,Link and Code 等各种类型的索引引擎
 2.索引格式选择：高容量，低精度 IMI+OPQ+reRank  
-              高精度，选择HNSW,当前浙大NSG索引不支持增量插入，没有采用
+              高精度，选择HNSW,当前NSG索引不支持增量插入，没有采用
+3.sptag,基于空间切分建图的方式   
+### framework    
+1.vearch :by JingDong AI.  和深度学习模型深度贴合     
+2.milvus :by zilliz.  以数据库的思路来做的    
 
 
