@@ -96,11 +96,11 @@ test_transform = T.Compose([
 # define mongodb connect
 def get_db():
     mongdb={}
-    mongdb['host']='dds-bp10da4305cf39f41.mongodb.rds.aliyuncs.com'
+    mongdb['host']='cc.com'
     mongdb['port']=3717
     client=MongoClient(host=mongdb['host'],port=mongdb['port'])
     dev=client.get_database('dev')
-    dev.authenticate(name='nnsearch',password='Eigen123')
+    dev.authenticate(name='cc',password='cc')
     return dev
 
 
