@@ -110,10 +110,24 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 ### papers
 -- PQ based  
 1.将传统的标量量化，转成分段乘积量化[Product Quantization for Nearest Neighbor Search](http://ieeexplore.ieee.org/document/5432202/)  
-2.类似于Cartisian Quantization，将向量整体进行旋转，使得聚类的分段坐标轴和向量对齐，聚类中心点和数据之间的重建误差小，压缩损失就小[Optimized Product Quantization](http://ieeexplore.ieee.org/document/6678503/)  
-3.[Revisiting the Inverted Indices for Billion-Scale Approximate Nearest Neighbors](http://arxiv.org/abs/1802.02422)  
-4.粗量化使用双倒排，可以降低聚类维度，增加聚类中心点，使用Multi-Sequence算法提高粗略命中速度[The Inverted MultiIndex](http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf)  
+2.类似于Cartisian Quantization，将向量整体进行旋转，使得聚类的分段坐标轴和向量对齐，聚类中心点和数据之间的重建误差小，压缩损失就小[Optimized Product Quantization](http://ieeexplore.ieee.org/document/6678503/) 
+
+3.[Revisiting the Inverted Indices for Billion-Scale Approximate Nearest Neighbors](http://arxiv.org/abs/1802.02422)提出使用anchor-point也即line-quantizition点来切分区域group,在搜索是pruning部分区域加速。和RobustiQ这篇论文撞衫。该论文中提出在一层中建立HNSW加速candidates center-point搜索选取。     
+4.粗量化使用双倒排，可以降低聚类维度，增加聚类中心点，使用Multi-Sequence算法提高粗略命中速度[The Inverted MultiIndex](http://cache-ash04.cdn.yandex.net/download.yandex.ru/company/cvpr2012.pdf)      
 5.多义码，将汉明码距离和量化中心点的距离建立映射关系，对entry-point有过滤作用 [Polysemous codes](https://arxiv.org/abs/1609.01882)  
+6.Additive Quantization 两篇论文：Additive Quantization for Extreme Vector Compression.使用稀疏加量化，量化误差更小，但需要额外存储与计算。   
+7.Composite Quantization.和上述Additive Quantizition 撞衫，额外提出NOCQ作为APQ替代，加速计算。     
+8.RobustiQ:A Robust ANN Search Method for Billion-scale Similarity Search on GPUs. 和第3篇论文很像，在传统IVF上添加了Line Quantization，也叫分组剪枝点，提升PQ搜索指标。  
+
+-- 索引分层：  
+1.Zoom:Multi-View Vector Search for Optimizing Accuracy, Latency and Memory 使用全量数据k-means聚类，大量百万级中心点建立第一层导航图HNSW来代替以前的IVF，第二层使用量化加速计算排序，不限于PQ或者APQ，第三层全精度计算排序。这种典型的三层索引方式可以使得每层能采用组件替换的方式来优化索引。  
+2.Pyramid:A General Framwork for Distributed Similarity Search.香港中文大学郑尚策实验室的，对比了naive-HNSW分图和metaHNSW-subHNSW两种分图方式对搜索效果影响。使用两层HNSW进行搜索。使用meta-HNSW的上层图解决了跨机器搜索的问题。该方法相对于简易切分naive-HNSW建图增加了meta-HNSW建图，全量数据点查询，分块构建三部分时间，建图比较慢。但搜索过程中meta-HNSW起到了哈希的方法，比naive-HNSW全集群请求再合并的吞吐量大不少。 
+3.索引分层和图优化，量化优化结合在一起，可以进行索引改进设计。  
+
+-- 子集索引  
+1.Reconfigurable Inverted Index:旨在解决搜索过程中既有向量近似需求，也有标签过滤需求的搜索场景。文中提出了subset search 问题，并给出了两种解决方案。虽然已经相当巧妙，但未看出来如何解决十亿级别数据如何解决。  
+
+
 
 -- Graph Based  
 1.可参见NSW 浏览小世界 论文，结合跳表结构构造的索引[Approximate nearest neighbor algorithm based on navigable small world graphs](https://linkinghub.elsevier.com/retrieve/pii/S0306437913001300)   
@@ -124,6 +138,7 @@ ANNS (Approximation Nearest Neighbor Search) to search a query vector in gallery
 10.[GGNN: Graph-based GPU Nearest Neighbor Search](https://arxiv.org/pdf/1912.01059.pdf)   
 11.[Zoom: Multi-View Vector Search for Optimizing Accuracy, Latency and Memory](https://www.microsoft.com/en-us/research/uploads/prod/2018/08/zoom-multi-view-tech-report.pdf)    
 12. [Vector and Line Quantization for Billion-scale Similarity Search on GPUs](https://arxiv.org/pdf/1901.00275.pdf)    
+13.[DiskANN:Fast Accurate Billion-point Nearest Neighbor Search on a Single Node](https://suhasjs.github.io/files/diskann_neurips19.pdf) 。提出vamana-Graph 解决了在单机建图解决十亿向量搜素问题。
 
 -- Hamming Code  
 1.[Fast Exact Search in Hamming Space with Multi-Index Hashing](http://arxiv.org/abs/1307.2982)  
